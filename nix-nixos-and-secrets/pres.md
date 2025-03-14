@@ -75,7 +75,7 @@ sudo nix flake init --template github:username/flake-starter-config
   description = "Nixos config flake";
   inputs = { nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable"; };
   outputs = { self, nixpkgs, ... }@inputs: {
-    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.default = nixpkgs.lib.nixosSystem {
       specialArgs = { inherit inputs; };
       modules = [
         ./configuration.nix
@@ -124,7 +124,7 @@ nix flake update
 
 - Secrets OPerationS
 - formáty: **YAML**, JSON, ENV, INI, BINARY 
-- šifuje pomocí: AWS KMS, GCP KMS, Azure Key Vault, PGP, age
+- šifruje pomocí: AWS KMS, GCP KMS, Azure Key Vault, PGP, **age**
 - široké spektrum použití:
     - CLI
     - Terraform provider
@@ -161,6 +161,7 @@ creation_rules:
 ```
 
 ```sh
+export SOPS_AGE_KEY_FILE=$(pwd)/age-key.txt
 sops edit secrets.yaml
 ```
 
@@ -199,7 +200,7 @@ sops edit secrets.yaml
     let pkgs = nixpkgs.legacyPackages.x86_64-linux;
     in {
       nixosConfigurations = {
-        your-hostname = nixpkgs.lib.nixosSystem {
+        default = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
           modules = [ ./configuration.nix ];
         };
@@ -238,8 +239,7 @@ sops edit secrets.yaml
             }
           ];
         };
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+        inputs.nixpkgs.follows = "nixpkgs";
       };
     };
 }
@@ -269,6 +269,42 @@ sops edit secrets.yaml
     '';
   };
 }
+```
+
+---
+
+# sops-nix 101
+
+```nix
+let
+  gh-wrapped = pkgs.writeShellScriptBin "gh" ''
+    ${pkgs.gh}/bin/gh --token $(cat ${config.sops.secrets.github-token.path}) $@
+  '';
+in
+environment.systemPackages = [
+  gh-wrapped
+];
+```
+
+---
+
+# sops-nix 101
+
+```nix
+{
+  sops.templates."service.env" = {
+    content = ''
+      API_KEY=${config.sops.placeholder."service/api/key"}
+      API_SECRET=${config.sops.placeholder."service/api/secret"}
+    '';
+  };
+}
+```
+
+```sh
+cat /run/secrets-rendered/service.env
+API_KEY=my-api-key
+API_SECRET=my-api-secret
 ```
 
 ---

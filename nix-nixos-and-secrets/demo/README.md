@@ -1,6 +1,11 @@
 # Nix/NixOS & secrets demo
 
 ```sh
+export SOPS_AGE_KEY_FILE=$(pwd)/age-key.txt
+sops edit secrets.yml
+```
+
+```sh
 vagrant up
 vagrant ssh
 cp -r /vagrant/flake-config /home/vagrant/

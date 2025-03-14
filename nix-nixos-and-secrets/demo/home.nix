@@ -2,7 +2,7 @@
   imports = [ ];
 
   sops = {
-    age.keyFile = "/home/vagrant/flake-config/keys.txt";
+    age.keyFile = "/home/vagrant/flake-config/age-key.txt";
 
     defaultSopsFile = ./secrets.yaml;
 
