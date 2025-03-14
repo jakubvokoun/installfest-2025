@@ -19,9 +19,8 @@
             home-manager.nixosModules.default
             {
               home-manager.sharedModules = [ sops-nix.homeManagerModules.sops ];
-              #home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              #home-manager.users.vagrant = import ./home.nix;
+              home-manager.users.vagrant = import ./home.nix;
             }
           ];
         };
